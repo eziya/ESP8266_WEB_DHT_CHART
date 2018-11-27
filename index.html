@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Temp+Humdity Monitoring</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.7.14/css/bootstrap-datetimepicker.min.css">
+  <style> .the-table {
+    table-layout: fixed;
+    word-wrap: break-word;
+    }
+  </style>
+</head>
+
+<body >
+  <div class="container">
+    <div class="jumbotron">
+      <h1>Welcome to Temp+Humdity Monitoring System</h1>
+      <p>Please use below URLs to use monitor temperature and humidity</p>
+    </div>
+    <div class="col-md-12">
+      <h3>Current temperature &amp; humidity</h3>
+      <table class="table-responsive table-condensed">
+        <tbody>
+          <tr>
+            <td><img class="img-responsive" src="temp.png" alt="temperature and humidity" width="100" height="100"></td>
+            <td>
+              <h1 class="current-temperature">20 <small> ℃</small>
+              </h1>
+            </td>
+            <td style="width: 20px"></td>
+            <td><img class="img-responsive" src="humid.png" alt="temperature and humidity" width="100" height="100"></td>
+            <td>
+              <h1 class="current-humidity">45 <small> %</small>
+              </h1>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="col-md-12">
+      <div>
+        <div class="col-md-6" id="chartTemp" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+        <div class="col-md-6" id="chartHumid" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+      </div>
+      <div class="col-md-8">
+        <form action="" class="form-horizontal" role="form">
+          <div class="form-group">
+            <div class="input-group date form_datetime col-md-5" data-date-format="yyyy MM dd" data-link-field="dtp_input1">
+              <input id="datepicker-input" class="form-control" size="16" type="text" value="" readonly="">
+              <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+              <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+            </div>
+            <input type="hidden" id="dtp_input1" value=""><br>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="col-md-12">
+      <h2>Sample URLs</h2>
+      <table class="table-responsive table-striped table-bordered table-condensed the-table">
+        <tbody>
+          <tr>
+            <th>Data type</th>
+            <th>URL</th>
+          </tr>
+          <tr>
+            <td>Current temperature</td>
+            <td><a href="temperature/current">http://52.78.197.115:8888/temperature/current</a></td>
+          </tr>
+          <tr>
+            <td>Daily temperature</td>
+            <td><a href="temperature/20161117">http://52.78.197.115:8888/temperature/[yyyyMMdd]</a></td>
+          </tr>
+          <tr>
+            <td>Current humidity</td>
+            <td><a href="humidity/current">http://52.78.197.115:8888/humidity/current</a></td>
+          </tr>
+          <tr>
+            <td>Daily humidity</td>
+            <td><a href="humidity/20161117">http://52.78.197.115:8888/humidity/[yyyyMMdd]</a></td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+      <div class="col-md-4 alert alert-warning alert-dismissable fade in">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+        <strong>*</strong>[yyyyMMdd] should be replaced with date string such as 20160101</div>
+    </div>
+    <!--
+    <div class="col-md-12">
+        <h2>Videos</h2>
+        <div class="embed-responsive embed-responsive-16by9">
+            <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/qrVEgOBC_E0"></iframe>
+        </div>
+    </div>
+    -->
+  </div>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/javascripts/bootstrap-datetimepicker.js" charset="UTF-8"></script>
+  <script type="text/javascript" src="/javascripts/locales/bootstrap-datetimepicker.ko.js" charset="UTF-8"></script>
+  <script src="http://code.highcharts.com/highcharts.js"></script>
+  <script src="http://code.highcharts.com/modules/exporting.js"></script>
+  <script type="text/javascript">
+    var chartTemp = null;
+    var chartHumid = null;
+
+    function initDatePicker() {
+      $('.form_datetime').datetimepicker({
+        language: 'en',
+        weekStart: 1,
+        todayBtn: 1,
+        autoclose: 1,
+        todayHighlight: 1,
+        startView: 2,
+        forceParse: 0,
+        showMeridian: 1,
+        minView: 2,
+        format: 'yyyy-mm-dd'
+      });
+      var now = new Date();
+      var day = ("0" + now.getDate()).slice(-2);
+      var month = ("0" + (now.getMonth() + 1)).slice(-2);
+      var today = now.getFullYear() + "-" + (month) + "-" + (day);
+      $('#datepicker-input').val(today);
+      $('.form_datetime').datetimepicker().on('changeDate', function(ev) {
+        renderChart();
+      });
+    }
+
+    function initChart() {
+      var optionsTemp = {
+        chart: {
+          type: 'area'
+        },
+        title: {
+          text: 'Daily temperature'
+        },
+        /*subtitle: {
+         text: ''
+         },*/
+        xAxis: {
+          allowDecimals: false,
+          labels: {
+            formatter: function() {
+              return this.value; // clean, unformatted number for year
+            }
+          }
+        },
+        yAxis: {
+          title: {
+            text: 'Temperature(℃)'
+          },
+          labels: {
+            formatter: function() {
+              return this.value;
+            }
+          }
+        },
+        tooltip: {
+          pointFormat: '<b>{point.y:,.1f}</b>'
+        },
+        series: [{
+          name: 'Temperature',
+          color: '#FF6600',
+          data: []
+        }]
+      };
+      var optionsHumid = {
+        chart: {
+          type: 'area'
+        },
+        title: {
+          text: 'Daily humidity'
+        },
+        /*subtitle: {
+         text: ''
+         },*/
+        xAxis: {
+          allowDecimals: false,
+          labels: {
+            formatter: function() {
+              return this.value; // clean, unformatted number for year
+            }
+          }
+        },
+        yAxis: {
+          title: {
+            text: 'Humidity(%)'
+          },
+          labels: {
+            formatter: function() {
+              return this.value;
+            }
+          }
+        },
+        tooltip: {
+          pointFormat: '<b>{point.y:,.1f}</b>'
+        },
+        series: [{
+          name: 'Humidity',
+          data: []
+        }]
+      };
+      chartTemp = new Highcharts.chart('chartTemp', optionsTemp);
+      chartHumid = new Highcharts.chart('chartHumid', optionsHumid);
+    }
+
+    function initTempHumidity() {
+      $.ajax({
+        url: '/temperature/current',
+        success: function(data) {
+          if (data.length > 0) $('.current-temperature').html(data[0].value + '<small> ℃</small>');
+        }
+      });
+      $.ajax({
+        url: '/humidity/current',
+        success: function(data) {
+          if (data.length > 0) $('.current-humidity').html(data[0].value + '<small> %</small>');
+        }
+      });
+    }
+
+    function renderChart() {
+      var dateInput = $('#datepicker-input').val();
+      var dateInput = dateInput.replace(/-/gi, "");
+      $.ajax({
+        url: '/temperature/' + dateInput,
+        success: function(data) {
+          var arrCollectTm = $.map(data, function(item, index) {
+            var tempDate = new Date(item.collect_tm);
+            //"Fri Nov 18 2016 09:25:38 GMT+0900 (대한민국 표준시)"
+            var localdate = tempDate.toString().split(" ")[4];
+            return [localdate];
+          });
+          var arrValue = $.map(data, function(item, index) {
+            return [Number(item.value)];
+          });
+          chartTemp.xAxis[0].setCategories(arrCollectTm);
+          chartTemp.series[0].setData(arrValue);
+        }
+      });
+      $.ajax({
+        url: '/humidity/' + dateInput,
+        success: function(data) {
+          var arrCollectTm = $.map(data, function(item, index) {
+            var tempDate = new Date(item.collect_tm);
+            //"Fri Nov 18 2016 09:25:38 GMT+0900 (대한민국 표준시)"
+            var localdate = tempDate.toString().split(" ")[4];
+            return [localdate];
+          });
+          var arrValue = $.map(data, function(item, index) {
+            return [Number(item.value)];
+          });
+          chartHumid.xAxis[0].setCategories(arrCollectTm);
+          chartHumid.series[0].setData(arrValue);
+        }
+      });
+    }
+    $(document).ready(function() {
+      initDatePicker();
+      initTempHumidity();
+      initChart();
+      renderChart();
+    });
+  </script>
+</body>
+
+</html>
