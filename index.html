@@ -6,14 +6,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.1/moment.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.7.14/js/bootstrap-datetimepicker.min.js"></script>
-  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.7.14/css/bootstrap-datetimepicker.min.css">
   
+  <!-- Bootstrap -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    
+  <!-- https://eonasdan.github.io/bootstrap-datetimepicker/ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.1/moment.min.js"></script>  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.7.14/js/bootstrap-datetimepicker.min.js"></script>
+  
+  <!-- High Chart -->
   <script src="http://code.highcharts.com/highcharts.js"></script>
   <script src="http://code.highcharts.com/modules/exporting.js"></script>   
   
@@ -30,6 +34,7 @@
       <h1>Temp.+Humidity Monitoring System</h1>
       <p>Please use below URLs to use monitor temperature and humidity</p>
     </div>
+    
     <div class="col-md-12">
       <h3>Current temperature &amp; humidity</h3>
       <table class="table-responsive table-condensed">
@@ -50,11 +55,13 @@
         </tbody>
       </table>
     </div>
+    
     <div class="col-md-12">
       <div>
         <div class="col-md-6" id="chartTemp" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
         <div class="col-md-6" id="chartHumid" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
       </div>
+      
       <div class="col-md-8">
         <form action="" class="form-horizontal" role="form">
           <div class="form-group">
@@ -67,8 +74,9 @@
             <input type="hidden" id="dtp_input1" value=""><br>
           </div>
         </form>
-      </div>
+      </div>      
     </div>
+    
     <div class="col-md-12">
       <h2>Sample URLs</h2>
       <table class="table-responsive table-striped table-bordered table-condensed the-table">
@@ -96,6 +104,7 @@
         </tbody>
       </table>
       <br>
+      
       <div class="col-md-4 alert alert-warning alert-dismissable fade in">
         <a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
         <strong>*</strong>[yyyyMMdd] should be replaced with date string such as 20180101
@@ -117,11 +126,11 @@
 
     function initDatePicker() {
       $('#datetimepicker1').datetimepicker({
+        date : new Date(),        
         format: 'YYYY-MM-DD'
       });
       
-      $('#datetimepicker1').datetimepicker().on('changeDate', function(ev) {
-        print('renderChart');
+      $('#datetimepicker1').datetimepicker().on('dp.change', function(ev) {        
         renderChart();
       });
     }
@@ -164,6 +173,7 @@
           data: []
         }]
       };
+      
       var optionsHumid = {
         chart: {
           type: 'area'
@@ -200,6 +210,7 @@
           data: []
         }]
       };
+      
       chartTemp = new Highcharts.chart('chartTemp', optionsTemp);
       chartHumid = new Highcharts.chart('chartHumid', optionsHumid);
     }
@@ -208,20 +219,24 @@
       $.ajax({
         url: '/temperature/current',
         success: function(data) {
+          <!-- {collec_tm:'2018-12-12 01:01:01', value:'20'} -->
           if (data.length > 0) $('.current-temperature').html(data[0].value + '<small> ℃</small>');
         }
       });
+      
       $.ajax({
         url: '/humidity/current',
         success: function(data) {
+          <!-- {collec_tm:'2018-12-12 01:01:01', value:'20'} -->
           if (data.length > 0) $('.current-humidity').html(data[0].value + '<small> %</small>');
         }
       });
     }
 
-    function renderChart() {
+    function renderChart() {      
       var dateInput = $('#datepicker-input').val();
       var dateInput = dateInput.replace(/-/gi, "");
+      
       $.ajax({
         url: '/temperature/' + dateInput,
         success: function(data) {
@@ -238,6 +253,7 @@
           chartTemp.series[0].setData(arrValue);
         }
       });
+      
       $.ajax({
         url: '/humidity/' + dateInput,
         success: function(data) {
@@ -259,9 +275,10 @@
     $(document).ready(function() {
       initDatePicker();
       initTempHumidity();
-      initChart();
+      initChart(); 
       renderChart();
     });
+    
   </script>  
 </body>
 </html>
