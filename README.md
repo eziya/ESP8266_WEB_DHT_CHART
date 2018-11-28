@@ -22,3 +22,6 @@ ESP8266 Web Server + DHT22 + DS3231 + Bootstrap + High Chart Example
  - https://blog.naver.com/eziya76/221407553316
  
 ![webserver](./esp8266_webserver.JPG)<br>
+
+<a href="https://youtu.be/CizNRO353Os" target="_blank"><img src="https://i.ytimg.com/vi/CizNRO353Os/3.jpg?time=1543412070905" 
+alt="ESP8266 + DHT22 + Bootstrap" width="240" height="180" border="10" /></a>
