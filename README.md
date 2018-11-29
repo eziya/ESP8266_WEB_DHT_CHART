@@ -2,6 +2,7 @@
 ESP8266 Web Server + DHT22 + DS3231 + Bootstrap + High Chart Example
 
 1. References
+- Tutorial: https://github.com/projetsdiy/ESP8266-Webserver-Tutorials/tree/master/Part2_DHT22WebserverESP8266_SPIFFS
 - ESP8266WebServer library from https://github.com/ThingPulse/esp8266-oled-ssd1306 <br>
 - DHT library from  https://github.com/adafruit/DHT-sensor-library
 - NTP Client library from https://travis-ci.org/arduino-libraries/NTPClient
